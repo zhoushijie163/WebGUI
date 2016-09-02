@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>TODO supply a title</title>
+        <script src="js/WebGUI.js"></script>
+    </head>
+    <body>
+        <input id="ccc" type="color"><input id="dcc" type="color">
+        <button onclick="return ff()">OK</button>
+        <div id="aaa">TODO write content</div>
+        <input type="file" accept="image/jpeg,image/png">
+        <br>
+        <input id="num1" type="text" size="300"><br><input id="num2" type="text" size="300"><br><button onclick="return add()">ADD</button><button onclick="return substr()">SUBTR</button><button onclick="return multi()">MULTI</button><button onclick="return div()">DIV</button><button onclick="return mod()">MOD</button>
+        <div id="sss">TODO write content</div>
+
+        <script>
+            var aaa = document.getElementById('aaa');
+            var ccc = document.getElementById('ccc');
+            var dcc = document.getElementById('dcc');
+            var sss = document.getElementById('sss');
+            function ff() {
+                //var acx = new WEBGUI.Color('100%','100%','100%','0.6009');
+                var acx = new WEBGUI.Color(ccc.value);
+                //acx.alpha='80.5%';
+                //acx.red = 50;
+                var bcx = acx.inverse();
+                //bcx.setValue("HSLA(77.5,1%,1%,30.5%)");
+                var ccx = new WEBGUI.Color(dcc.value);
+                //ccx.copy(acx);
+                //ccx.setHSV(77.5, 10, 10);
+                var dcx = ccx.add(bcx);
+                var ecx = ccx.multiply(bcx);
+                aaa.innerHTML = '取色' + ccc.value + ';&nbsp;' + dcc.value;
+                aaa.innerHTML += '<br><span style="background-color:' + acx.toStyleValue() + ';border:1px solid black;">&nbsp;&nbsp;</span>Value=' + acx.toStyleValue() + ';&nbsp;Hex=' + acx.toHexString() + ';&nbsp;' + acx.toStyleRBG() + ';&nbsp;' + acx.toStyleHSL() + ';&nbsp;' + acx.toStyleHSV() + ';&nbsp;' + acx.toStyleCMYK() + ';&nbsp;' + acx.toStyleRBGA() + ';&nbsp;' + acx.toStyleHSLA() + ';&nbsp;' + acx.toString();
+                aaa.innerHTML += '<br><span style="background-color:' + bcx.toStyleValue() + ';border:1px solid black;">&nbsp;&nbsp;</span>Value=' + bcx.toStyleValue() + ';&nbsp;Hex=' + bcx.toHexString() + ';&nbsp;' + bcx.toStyleRBG() + ';&nbsp;' + bcx.toStyleHSL() + ';&nbsp;' + bcx.toStyleHSV() + ';&nbsp;' + bcx.toStyleRBGA() + ';&nbsp;' + bcx.toStyleHSLA() + ';&nbsp;' + bcx.toString();
+                aaa.innerHTML += '<br><span style="background-color:' + ccx.toStyleValue() + ';border:1px solid black;">&nbsp;&nbsp;</span>Value=' + ccx.toStyleValue() + ';&nbsp;Hex=' + ccx.toHexString() + ';&nbsp;' + ccx.toStyleRBG() + ';&nbsp;' + ccx.toStyleHSL() + ';&nbsp;' + ccx.toStyleHSV() + ';&nbsp;' + ccx.toStyleRBGA() + ';&nbsp;' + ccx.toStyleHSLA() + ';&nbsp;' + ccx.toString();
+                aaa.innerHTML += '<br><span style="background-color:' + dcx.toStyleValue() + ';border:1px solid black;">&nbsp;&nbsp;</span>Value=' + dcx.toStyleValue() + ';&nbsp;Hex=' + dcx.toHexString() + ';&nbsp;' + dcx.toStyleRBG() + ';&nbsp;' + dcx.toStyleHSL() + ';&nbsp;' + dcx.toStyleHSV() + ';&nbsp;' + dcx.toStyleRBGA() + ';&nbsp;' + dcx.toStyleHSLA() + ';&nbsp;' + dcx.toString();
+                aaa.innerHTML += '<br><span style="background-color:' + ecx.toStyleValue() + ';border:1px solid black;">&nbsp;&nbsp;</span>Value=' + ecx.toStyleValue() + ';&nbsp;Hex=' + ecx.toHexString() + ';&nbsp;' + ecx.toStyleRBG() + ';&nbsp;' + ecx.toStyleHSL() + ';&nbsp;' + ecx.toStyleHSV() + ';&nbsp;' + ecx.toStyleRBGA() + ';&nbsp;' + ecx.toStyleHSLA() + ';&nbsp;' + ecx.toString();
+            }
+
+            function add() {
+                var num1 = document.getElementById('num1').value;
+                var num2 = document.getElementById('num2').value;
+                var num3 = Math.addition(num1, num2);
+                sss.innerHTML = num3.toString();
+                sss.innerHTML += '<br>' + (parseFloat(num1) + parseFloat(num2)).toString();
+            }
+            function substr() {
+                var num1 = document.getElementById('num1').value;
+                var num2 = document.getElementById('num2').value;
+                var num3 = Math.subtraction(num1, num2);
+                sss.innerHTML = num3.toString();
+                sss.innerHTML += '<br>' + (parseFloat(num1) - parseFloat(num2)).toString();
+            }
+            function multi() {
+                var num1 = document.getElementById('num1').value;
+                var num2 = document.getElementById('num2').value;
+                var num3 = Math.multiplication(num1, num2);
+                sss.innerHTML = num3.toString();
+                sss.innerHTML += '<br>' + (parseFloat(num1) * parseFloat(num2)).toString();
+            }
+            function div() {
+                var num1 = document.getElementById('num1').value;
+                var num2 = document.getElementById('num2').value;
+                var num3 = Math.division(num1, num2);
+                sss.innerHTML = num3.toString();
+                sss.innerHTML += '<br>' + (parseFloat(num1) / parseFloat(num2)).toString();
+            }
+            function mod() {
+                var num1 = document.getElementById('num1').value;
+                var num2 = document.getElementById('num2').value;
+                var num3 = Math.modulo(num1, num2);
+                sss.innerHTML = num3.toString();
+                sss.innerHTML += '<br>' + (parseFloat(num1) % parseFloat(num2)).toString();
+            }
+        </script>
+    </body>
+</html>
