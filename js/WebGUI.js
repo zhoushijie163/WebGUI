@@ -1629,3 +1629,73 @@ WEBGUI.ColorKeywords = {
     'yellow': 0x00FFFF, 'yellowgreen': 0x32CD9A
 };
 
+WEBGUI.Ponit2D = function () {
+    var _x = 0, _y = 0;
+    this.getValue = getValue;
+    this.getX = getX;
+    this.setX = setX;
+    this.getY = getY;
+    this.setY = setY;
+    
+    this.copy = function (point) {
+        if (typeof point === "object" && point instanceof WEBGUI.Ponit2D) {
+            copyPonit(point);
+        }
+    };
+    
+    switch (arguments.length) {
+        case 1:
+            setX(arguments[0]);
+            break;
+        case 2:
+            setX(arguments[0]);
+            setY(arguments[1]);
+            break;
+    }
+    
+    function getX() {
+        return _x;
+    }
+    function setX(x) {
+        if (typeof x === "number") {
+            _x = x;
+        } else if (typeof x === "string") {
+            var m;
+            if (!!(m = /^[+-]?(0x[0-9a-f]+|\d+)$/i.exec(x))) {
+                _x = Math.parseInt(x);
+            } else if(!!(m = /^[+-]?\d*\.\d+$/i.exec(x))) {
+                _x = Math.parseFloat(x);
+            }
+        } else if (typeof value === "object" && value instanceof WEBGUI.Ponit2D) {
+            copyPonit(x);
+        }
+    }
+    
+    function getValue() {
+        var val = {x: 0, y: 0};
+        val.x = _x;
+        val.y = _y;
+        return val;
+    }
+
+    function getY() {
+        return _y;
+    }
+    function setY(y) {
+        if (typeof y === "number") {
+            _y = y;
+        } else if (typeof y === "string") {
+            var m;
+            if (!!(m = /^[+-]?(0x[0-9a-f]+|\d+)$/i.exec(y))) {
+                _y = Math.parseInt(y);
+            } else if(!!(m = /^[+-]?\d*\.\d+$/i.exec(x))) {
+                _y = Math.parseFloat(y);
+            }
+        }
+    }
+    
+    function copyPonit(point) {
+        _x = point.getX();
+        _y = point.getY();
+    }
+}
