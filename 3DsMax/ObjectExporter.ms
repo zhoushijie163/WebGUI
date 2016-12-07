@@ -1,5 +1,6 @@
 rollout ModelExporter "三维模型导出工具"
 (
+	-- 结构定义
 	struct jsonMesh(sUuid, sType, sName, bCastShadow = false, bReceiveShadow = false, bVisible = true, sGeometryUuid, sMaterialUuid, aChildren = #(), aMatrix = #(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1))
 	struct jsonGeometryParameter(sName,nValue)
 	struct jsonGeometry(sUuid, sType, sName, aParameters = #(), aVertices = #(), aNormals = #(), aColors = #(), aUvs = #(), aFaces = #())
@@ -26,6 +27,7 @@ rollout ModelExporter "三维模型导出工具"
 	oMaterials = #(),
 	oTextures = #(),
 	oImages = #(),
+	zname,
 	ostream
 
 	-- 用户界面
@@ -380,8 +382,8 @@ rollout ModelExporter "三维模型导出工具"
 			(
 				msh = jsonMesh sUuid:(generateUUID()) sType:"Mesh" sName:objNode.name
 				
-				msh.sGeometryUuid = extractGeometry objMesh objMaterial needsFlip
 				msh.sMaterialUuid = extractMaterial objMaterial
+				msh.sGeometryUuid = extractGeometry objMesh objMaterial needsFlip
 				append oMeshs msh
 			)
 		)
@@ -760,8 +762,8 @@ rollout ModelExporter "三维模型导出工具"
 		else
 		(
 			Format "\"uuid\": \"%\",\n" (generateUUID()) to:ostream
-			Format "\"type\": \"%\",\n" "Scene" to:ostream
-			
+			Format "\"type\": \"%\",\n" "Group" to:ostream
+			Format "\"name\": \"%\",\n" zname to:ostream
 			Format headerArrayFormat "children" to:ostream
 			for i = 1 to oMeshs.count do
 			(
