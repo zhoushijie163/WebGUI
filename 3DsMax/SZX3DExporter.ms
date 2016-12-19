@@ -2,21 +2,7 @@ rollout SZX3DExporter "三维模型导出工具"
 (
 	-- Variables
 	local ostream,
-	headerFormat = "\"metadata\":
-{
-\"sourceFile\": \"%\",
-\"generatedBy\": \"3ds max SZX3DExporter\",
-\"formatVersion\": 3.1,
-\"vertices\": %,
-\"normals\": %,
-\"colors\": %,
-\"uvs\": %,
-\"triangles\": %,
-\"materials\": %
-},
-
-",
-
+	headerFormat = "\"metadata\":\n{\n\"sourceFile\": \"%\",\n\"generatedBy\": \"3ds max SZX3DExporter\",\n\"formatVersion\": 3.1,\n\"vertices\": %,\n\"normals\": %,\n\"colors\": %,\n\"uvs\": %,\n\"triangles\": %,\n\"materials\": %\n},\n",
 	vertexFormat = "%,%,%",
 	vertexNormalFormat = "%,%,%",
 	UVFormat = "%,%",
@@ -612,7 +598,7 @@ rollout SZX3DExporter "三维模型导出工具"
 	-- Extract only things that either already are or can be converted to meshes
 	function ExtractMesh node =
 	(
-		if SuperClassOf node == GeometryClass then
+		if (SuperClassOf node == GeometryClass) and ( ClassOf node != Targetobject) then
 		(
 			needsFlip = false
 			hasVColors = false
@@ -647,6 +633,7 @@ rollout SZX3DExporter "三维模型导出工具"
 		sceneHasVColors = false
 		for obj in selection do
 		(
+			windows.processPostedMessages()
 			result = ExtractMesh obj
 			meshObj = result[1]
 			if ClassOf meshObj == TriMesh then
@@ -719,7 +706,7 @@ rollout SZX3DExporter "三维模型导出工具"
 	(
 		zname = getFilenameFile maxFileName
 		zname += ".js"
-		fname = GetSaveFileName filename:zname types:"JavaScript file (*.js)|*.js|All Files(*.*)|*.*|"
+		fname = GetSaveFileName filename:zname types:"JavaScript文件 (*.js)|*.js|所有文件(*.*)|*.*|"
 		if fname == undefined then
 		(
 			return undefined
@@ -737,10 +724,14 @@ rollout SZX3DExporter "三维模型导出工具"
 	-- Export button click handler
 	on btn_export pressed do
 	(
-	    --oldSystemType = units.SystemType
-	    --oldMetricType = units.MetricType
-	    --units.SystemType = #centimeters
-        --units.MetricType = #centimeters
+	    --导出前统一单位到厘米
+	    oldratio = units.decodeValue "1.0cm"
+	    oldSystemType = units.SystemType
+	    oldMetricType = units.MetricType
+	    units.SystemType = #centimeters
+        units.MetricType = #centimeters
+ 	    in coordsys world about coordsys scale objects [(1.0 / oldratio),(1.0 / oldratio),(1.0 / oldratio)]  --全局缩放
+       
 		ostream = GetSaveFileStream()
 		if ostream != undefined then
 		(
@@ -748,9 +739,10 @@ rollout SZX3DExporter "三维模型导出工具"
 			close ostream
 			DestroyDialog SZX3DExporter
 		)
-	    --units.SystemType = oldSystemType
-        --units.MetricType = oldMetricType
-
+		--恢复原始单位
+	    units.SystemType = oldSystemType
+        units.MetricType = oldMetricType
+        in coordsys world about coordsys scale objects [oldratio, oldratio, oldratio]  --全局缩放
 	)
 )
 createDialog SZX3DExporter width:300
