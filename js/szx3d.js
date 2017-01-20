@@ -9674,24 +9674,24 @@ SZX3D.CubeCamera = function (near, far, cubeResolution) {
     this.add(cameraNZ);
     var options = {format: SZX3D.RGBFormat, magFilter: SZX3D.LinearFilter, minFilter: SZX3D.LinearFilter};
     this.renderTarget = new SZX3D.WebGLRenderTargetCube(cubeResolution, cubeResolution, options);
-    this.updateCubeMap = function (renderer, scene) {
+    this.updateCubeMap = function (renderer, scene, forceClear) {
         if (this.parent === null) this.updateMatrixWorld();
         var renderTarget = this.renderTarget;
         var generateMipmaps = renderTarget.texture.generateMipmaps;
         renderTarget.texture.generateMipmaps = false;
         renderTarget.activeCubeFace = 0;
-        renderer.render(scene, cameraPX, renderTarget);
+        renderer.render(scene, cameraPX, renderTarget, forceClear);
         renderTarget.activeCubeFace = 1;
-        renderer.render(scene, cameraNX, renderTarget);
+        renderer.render(scene, cameraNX, renderTarget, forceClear);
         renderTarget.activeCubeFace = 2;
-        renderer.render(scene, cameraPY, renderTarget);
+        renderer.render(scene, cameraPY, renderTarget, forceClear);
         renderTarget.activeCubeFace = 3;
-        renderer.render(scene, cameraNY, renderTarget);
+        renderer.render(scene, cameraNY, renderTarget, forceClear);
         renderTarget.activeCubeFace = 4;
-        renderer.render(scene, cameraPZ, renderTarget);
+        renderer.render(scene, cameraPZ, renderTarget, forceClear);
         renderTarget.texture.generateMipmaps = generateMipmaps;
         renderTarget.activeCubeFace = 5;
-        renderer.render(scene, cameraNZ, renderTarget);
+        renderer.render(scene, cameraNZ, renderTarget, forceClear);
         renderer.setRenderTarget(null);
     };
 };
@@ -12887,9 +12887,11 @@ SZX3D.Mesh.prototype = Object.assign(Object.create(SZX3D.Object3D.prototype), {
                     if (intersection) {
                         if (uvs) {
                             var uvs_f = uvs[ f ];
-                            uvA.copy(uvs_f[ 0 ]);
-                            uvB.copy(uvs_f[ 1 ]);
-                            uvC.copy(uvs_f[ 2 ]);
+                            if (uvs_f) {
+                                uvA.copy(uvs_f[ 0 ]);
+                                uvB.copy(uvs_f[ 1 ]);
+                                uvC.copy(uvs_f[ 2 ]);
+                            }
                             intersection.uv = uvIntersection(intersectionPoint, fvA, fvB, fvC, uvA, uvB, uvC);
                         }
                         intersection.face = face;
@@ -24179,6 +24181,25 @@ SZX3D.ArrowHelper.prototype.setColor = function (color) {
     this.line.material.color.copy(color);
     this.cone.material.color.copy(color);
 };
+SZX3D.AmbientLightHelper = function (light, sphereSize){
+	this.light = light;
+	this.light.updateMatrixWorld();
+	var geometry = new SZX3D.SphereBufferGeometry(sphereSize, 8, 4);
+	var material = new SZX3D.MeshBasicMaterial( { wireframe: true, fog: false } );
+	material.color.copy( this.light.color );
+	SZX3D.Mesh.call( this, geometry, material );
+	this.matrix = this.light.matrixWorld;
+	this.matrixAutoUpdate = false;
+};
+SZX3D.AmbientLightHelper.prototype = Object.create( SZX3D.Mesh.prototype );
+SZX3D.AmbientLightHelper.prototype.constructor = SZX3D.AmbientLightHelper;
+SZX3D.AmbientLightHelper.prototype.dispose = function () {
+	this.geometry.dispose();
+	this.material.dispose();
+};
+SZX3D.AmbientLightHelper.prototype.update = function () {
+	this.material.color.copy(this.light.color);
+};
 SZX3D.BoxHelper = function (object, color) {
     if (color === undefined) color = 0xffff00;
     var indices = new Uint16Array([0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7]);
@@ -24187,15 +24208,14 @@ SZX3D.BoxHelper = function (object, color) {
     geometry.setIndex(new SZX3D.BufferAttribute(indices, 1));
     geometry.addAttribute('position', new SZX3D.BufferAttribute(positions, 3));
     SZX3D.LineSegments.call(this, geometry, new SZX3D.LineBasicMaterial({color: color}));
-    if (object !== undefined) {
-        this.update(object);
-    }
+    this.update(object);
 };
 SZX3D.BoxHelper.prototype = Object.create(SZX3D.LineSegments.prototype);
 SZX3D.BoxHelper.prototype.constructor = SZX3D.BoxHelper;
 SZX3D.BoxHelper.prototype.update = (function () {
     var box = new SZX3D.Box3();
     return function update(object) {
+    	if (object === undefined || object === null) return;
         if (object instanceof SZX3D.Box3) {
             box.copy(object);
         } else {
@@ -24648,11 +24668,13 @@ SZX3D.SpotLightHelper = function (light) {
     this.matrixAutoUpdate = false;
     var geometry = new SZX3D.BufferGeometry();
     var positions = [
-        0, 0, 0, 0, 0, 1,
+		0, 0, 0, 0, 0, 1,        
         0, 0, 0, 1, 0, 1,
         0, 0, 0, -1, 0, 1,
         0, 0, 0, 0, 1, 1,
-        0, 0, 0, 0, -1, 1
+        0, 0, 0, 0, -1, 1,
+        1, 0, 1, -1, 0, 1,
+        0, 1, 1, 0, -1, 1
     ];
     for (var i = 0, j = 1, l = 32; i < l; i++, j++) {
         var p1 = (i / l) * Math.PI * 2;
@@ -24666,6 +24688,10 @@ SZX3D.SpotLightHelper = function (light) {
     var material = new SZX3D.LineBasicMaterial({fog: false});
     this.cone = new SZX3D.LineSegments(geometry, material);
     this.add(this.cone);
+    geometry = new SZX3D.BufferGeometry();
+    geometry.addAttribute('position', new SZX3D.Float32Attribute([0, 0, 0, 0, 0, 1], 3));
+    this.targetLine = new SZX3D.LineSegments(geometry, material);
+    this.add(this.targetLine);
     this.update();
 };
 SZX3D.SpotLightHelper.prototype = Object.create(SZX3D.Object3D.prototype);
@@ -24673,20 +24699,54 @@ SZX3D.SpotLightHelper.prototype.constructor = SZX3D.SpotLightHelper;
 SZX3D.SpotLightHelper.prototype.dispose = function () {
     this.cone.geometry.dispose();
     this.cone.material.dispose();
+    this.targetLine.geometry.dispose();
+    this.targetLine.material.dispose();
 };
 SZX3D.SpotLightHelper.prototype.update = function () {
     var vector = new SZX3D.Vector3();
     var vector2 = new SZX3D.Vector3();
+    var vector3 = new SZX3D.Vector3();
     return function update() {
         var coneLength = this.light.distance ? this.light.distance : 1000;
         var coneWidth = coneLength * Math.tan(this.light.angle);
         this.cone.scale.set(coneWidth, coneWidth, coneLength);
         vector.setFromMatrixPosition(this.light.matrixWorld);
         vector2.setFromMatrixPosition(this.light.target.matrixWorld);
+        vector3.subVectors(vector2, vector);
         this.cone.lookAt(vector2.sub(vector));
         this.cone.material.color.copy(this.light.color).multiplyScalar(this.light.intensity);
+        this.targetLine.lookAt(vector3);
+        this.targetLine.scale.z = vector3.length();
     };
 }();
+SZX3D.LightTargetHelper = function (light, size) {
+	this.light = light;
+	this.target = (function () { 
+		if (light.target === undefined) {
+			var target = new SZX3D.Object3D();
+			target.position.setFromMatrixPosition( light.matrixWorld );
+			return target;
+		} else {
+			return light.target;
+		}
+	})();
+	this.target.updateMatrixWorld();
+	var geometry = new SZX3D.BoxGeometry( size, size, size );
+	var material = new SZX3D.MeshBasicMaterial( { wireframe: true, fog: false } );
+	material.color.copy( this.light.color ).multiplyScalar( this.light.intensity );
+	SZX3D.Mesh.call( this, geometry, material );
+	this.matrix = this.target.matrixWorld;
+	this.matrixAutoUpdate = false;
+};
+SZX3D.LightTargetHelper.prototype = Object.create( SZX3D.Mesh.prototype );
+SZX3D.LightTargetHelper.prototype.constructor = SZX3D.LightTargetHelper;
+SZX3D.LightTargetHelper.prototype.dispose = function () {
+	this.geometry.dispose();
+	this.material.dispose();
+};
+SZX3D.LightTargetHelper.prototype.update = function () {
+	this.material.color.copy( this.light.color ).multiplyScalar( this.light.intensity );
+};
 SZX3D.VertexNormalsHelper = function (object, size, hex, linewidth) {
     this.object = object;
     this.size = (size !== undefined) ? size : 1;
@@ -27229,10 +27289,10 @@ SZX3D.PlanControls = function ( object, domElement ) {
 		var delta = 0;
 		if ( event.wheelDelta ) {
 			// WebKit / Opera / Explorer 9
-			delta = - event.wheelDelta * 0.25;
+			delta = - event.wheelDelta * 0.025;
 		} else if ( event.detail ) {
 			// Firefox
-			delta = event.detail * 3;
+			delta = event.detail * 0.3;
 		}
 		scope.zoom( new SZX3D.Vector3( 0, 0, delta ) );
 	}
@@ -27420,10 +27480,10 @@ SZX3D.EditorControls = function ( object, domElement ) {
 		var delta = 0;
 		if ( event.wheelDelta ) {
 			// WebKit / Opera / Explorer 9
-			delta = - event.wheelDelta * 0.25;
+			delta = - event.wheelDelta * 0.025;
 		} else if ( event.detail ) {
 			// Firefox
-			delta = event.detail * 3;
+			delta = event.detail * 0.3;
 		}
 		scope.zoom( new SZX3D.Vector3( 0, 0, delta ) );
 	}
@@ -27561,6 +27621,7 @@ SZX3D.GameControls = function ( object, domElement ) {
 		//object.position.copy(reference.position);
 		//object.rotation.y = reference.rotation.y;
 		//console.log(movementX, movementY,movementX * delta * Math.PI / 360,reference.rotation, object.rotation)
+		scope.dispatchEvent( changeEvent );
 	};
 	// mouse
 	function onMouseDown( event ) {
@@ -28242,15 +28303,15 @@ SZX3D.GameControls.prototype.constructor = SZX3D.GameControls;
 				point.multiply( parentScale );
 				if ( scope.space === "local" ) {
 					if ( scope.axis === "XYZ" ) {
-						scale = 1 + ( ( point.y ) / Math.max( oldScale.x, oldScale.y, oldScale.z ) );
+						scale = 1 + ( ( point.y ) * Math.min( oldScale.x, oldScale.y, oldScale.z ) / 30 );
 						scope.object.scale.x = oldScale.x * scale;
 						scope.object.scale.y = oldScale.y * scale;
 						scope.object.scale.z = oldScale.z * scale;
 					} else {
 						point.applyMatrix4( tempMatrix.getInverse( worldRotationMatrix ) );
-						if ( scope.axis === "X" ) scope.object.scale.x = oldScale.x * ( 1 + point.x / oldScale.x );
-						if ( scope.axis === "Y" ) scope.object.scale.y = oldScale.y * ( 1 + point.y / oldScale.y );
-						if ( scope.axis === "Z" ) scope.object.scale.z = oldScale.z * ( 1 + point.z / oldScale.z );
+						if ( scope.axis === "X" ) scope.object.scale.x = oldScale.x * ( 1 + point.x * oldScale.x  / 30 );
+						if ( scope.axis === "Y" ) scope.object.scale.y = oldScale.y * ( 1 + point.y * oldScale.y  / 30 );
+						if ( scope.axis === "Z" ) scope.object.scale.z = oldScale.z * ( 1 + point.z * oldScale.z  / 30 );
 					}
 				}
 			} else if ( _mode === "rotate" ) {
