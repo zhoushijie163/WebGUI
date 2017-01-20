@@ -12,6 +12,9 @@ and open the template in the editor.
         <script src="js/WebGUI.js"></script>
     </head>
     <body>
+        <input id="xxx" type="number"><input id="yyy" type="number"><input id="vvv" type="text">
+        <button onclick="return pp()">OK</button>
+        <div id="ppp">TODO write content</div>
         <input id="ccc" type="color"><input id="dcc" type="color">
         <button onclick="return ff()">OK</button>
         <div id="aaa">TODO write content</div>
@@ -21,10 +24,21 @@ and open the template in the editor.
         <div id="sss">TODO write content</div>
 
         <script>
+            var xxx = document.getElementById('xxx');
+            var yyy = document.getElementById('yyy');
+            var vvv = document.getElementById('vvv');
+            var ppp = document.getElementById('ppp');
             var aaa = document.getElementById('aaa');
             var ccc = document.getElementById('ccc');
             var dcc = document.getElementById('dcc');
             var sss = document.getElementById('sss');
+            function pp() {
+                var pa = new WEBGUI.Ponit2D(xxx.value, yyy.value),pb = new WEBGUI.Ponit2D(vvv.value),pc = new WEBGUI.Ponit2D(pa.value);
+                ppp.innerHTML = '取点' + xxx.value + ',&nbsp;' + yyy.value;
+                ppp.innerHTML += '<br>1点&nbsp;Value={' + pa.x + ',&nbsp;' + pa.y + '}';
+                ppp.innerHTML += '<br>2点&nbsp;x=' + pb.x + ',&nbsp;y=' + pb.y ;
+                ppp.innerHTML += '<br>3点&nbsp;x=' + pc.x + ',&nbsp;y=' + pc.y ;
+           }
             function ff() {
                 //var acx = new WEBGUI.Color('100%','100%','100%','0.6009');
                 var acx = new WEBGUI.Color(ccc.value);

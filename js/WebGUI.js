@@ -6,8 +6,8 @@
  * @author Zhou Shijie
  */
 "use strict";
-/* global Function, parseFloat, parseInt, Infinity */
 var WEBGUI = {REVISION: '1'};
+
 // Browserify 支持
 if (typeof window.define === 'function' && window.define.amd) {
     window.define('webgui', WEBGUI);
@@ -452,8 +452,6 @@ if (typeof window.define === 'function' && window.define.amd) {
         }
     }
 
-
-
     function strAddition(n1, n2) {
         var ss = '', k = 0, j = 0;
         var s1, s2, l1, l2, m;
@@ -836,6 +834,7 @@ if (typeof window.define === 'function' && window.define.amd) {
         }
         return a + (b.length === 0 ? '' : '.' + b);
     }
+    
     function strModulo(n1, n2) {
         var bcs, cs, ys = '', xs = '', wy = 0;
         var l1 = n1.fractional.length, l2 = n2.fractional.length;
@@ -948,6 +947,23 @@ WEBGUI.MOUSEBUTTONS = {NONE: 0, LEFT: 1, RIGHT: 2, MIDDLE: 4, BACK: 8, FORWARD: 
 
 WEBGUI.Color = function () {
     var colorValue = 0, alphaValue = 1;
+    switch (arguments.length) {
+        case 1:
+            setValue(arguments[0]);
+            break;
+        case 2:
+            setValue(arguments[0]);
+            setAlpha(arguments[1]);
+            break;
+        case 3:
+            setRGB(arguments[0], arguments[1], arguments[2]);
+            break;
+        case 4:
+            setRGB(arguments[0], arguments[1], arguments[2]);
+            setAlpha(arguments[3]);
+            break;
+    }
+    
     this.getValue = getValue;
     this.setValue = setValue;
     this.getRed = getRed;
@@ -976,11 +992,13 @@ WEBGUI.Color = function () {
     this.toStyleHSLA = toStyleHSLA;
     this.toStyleHSV = toStyleHSV;
     this.toStyleCMYK = toStyleCMYK;
+    
     this.copy = function (color) {
         if (typeof color === "object" && color instanceof WEBGUI.Color) {
             copyColor(color);
         }
     };
+    
     this.equals = function (color) {
         if (typeof color === "object" && color instanceof WEBGUI.Color) {
             return (color.getValue() === colorValue) && (color.getAlpha() === alphaValue);
@@ -988,23 +1006,6 @@ WEBGUI.Color = function () {
             return false;
         }
     };
-
-    switch (arguments.length) {
-        case 1:
-            setValue(arguments[0]);
-            break;
-        case 2:
-            setValue(arguments[0]);
-            setAlpha(arguments[1]);
-            break;
-        case 3:
-            setRGB(arguments[0], arguments[1], arguments[2]);
-            break;
-        case 4:
-            setRGB(arguments[0], arguments[1], arguments[2]);
-            setAlpha(arguments[3]);
-            break;
-    }
 
     function getValue() {
         return colorValue;
@@ -1063,6 +1064,7 @@ WEBGUI.Color = function () {
             copyColor(value);
         }
     }
+    
     function copyColor(color) {
         colorValue = color.getValue();
         alphaValue = color.getAlpha();
@@ -1631,7 +1633,18 @@ WEBGUI.ColorKeywords = {
 
 WEBGUI.Ponit2D = function () {
     var _x = 0, _y = 0;
+    switch (arguments.length) {
+        case 1:
+            setValue(arguments[0]);
+            break;
+        case 2:
+            setX(arguments[0]);
+            setY(arguments[1]);
+            break;
+    }
+    
     this.getValue = getValue;
+    this.setValue = setValue;
     this.getX = getX;
     this.setX = setX;
     this.getY = getY;
@@ -1643,14 +1656,49 @@ WEBGUI.Ponit2D = function () {
         }
     };
     
-    switch (arguments.length) {
-        case 1:
-            setX(arguments[0]);
-            break;
-        case 2:
-            setX(arguments[0]);
-            setY(arguments[1]);
-            break;
+    this.equals = function (point) {
+        if (typeof point === "object" && point instanceof WEBGUI.Ponit2D) {
+            return (point.getX() === _x) && (color.getY() === _y);
+        } else {
+            return false;
+        }
+    };
+
+    function getValue() {
+        var val = {x: 0, y: 0};
+        val.x = _x;
+        val.y = _y;
+        return val;
+    }
+    function setValue(value) {
+        if (typeof value === "number") {
+            _x = value;
+        } else if (typeof value === "string") {
+            var m;
+            if (!!(m = /^[+-]?(0x[0-9a-f]+|\d+)$/i.exec(value))) {
+                _x = Number.parseInt(value);
+            } else if(!!(m = /^[+-]?\d*\.\d+$/i.exec(value))) {
+                _x = Number.parseFloat(value);
+            } else if(!!(m = /^\{\s*[\'\"]?(.+?)[\'\"]?\s*,\s*[\'\"]?(.+?)[\'\"]?\s*\}$/i.exec(value))) {
+                setX(m[1]);
+                setY(m[2]);
+            } else if(!!(m = /^\{\s*x\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*,\s*y\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*\}$/i.exec(value))) {
+                setX(m[1]);
+                setY(m[2]);
+            } else if(!!(m = /^\{\s*y\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*,\s*x\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*\}$/i.exec(value))) {
+                setX(m[2]);
+                setY(m[1]);
+            } else if (WEBGUI.DEBUG) {
+                 console.error("函数 WEBGUI.Point2D.setValue 的参数 value = '" + x + "'，不能识别。");
+            }
+        } else if (typeof value === "object" && value instanceof WEBGUI.Ponit2D) {
+            copyPonit(value);
+        } else if ((!!value.x) && (!!value.y)) {
+            setX(value.x);
+            setY(value.y);
+        } else if (WEBGUI.DEBUG) {
+            console.error("函数 WEBGUI.Point2D.setX 的参数不能识别。");
+        }
     }
     
     function getX() {
@@ -1662,20 +1710,15 @@ WEBGUI.Ponit2D = function () {
         } else if (typeof x === "string") {
             var m;
             if (!!(m = /^[+-]?(0x[0-9a-f]+|\d+)$/i.exec(x))) {
-                _x = Math.parseInt(x);
+                _x = Number.parseInt(x);
             } else if(!!(m = /^[+-]?\d*\.\d+$/i.exec(x))) {
-                _x = Math.parseFloat(x);
+                _x = Number.parseFloat(x);
+            } else if (WEBGUI.DEBUG) {
+                console.error("函数 WEBGUI.Point2D.setX 的参数 x = '" + x + "'，不是数字。");
             }
-        } else if (typeof value === "object" && value instanceof WEBGUI.Ponit2D) {
-            copyPonit(x);
+        } else if (WEBGUI.DEBUG) {
+            console.error("函数 WEBGUI.Point2D.setX 的参数不是数字。");
         }
-    }
-    
-    function getValue() {
-        var val = {x: 0, y: 0};
-        val.x = _x;
-        val.y = _y;
-        return val;
     }
 
     function getY() {
@@ -1687,15 +1730,44 @@ WEBGUI.Ponit2D = function () {
         } else if (typeof y === "string") {
             var m;
             if (!!(m = /^[+-]?(0x[0-9a-f]+|\d+)$/i.exec(y))) {
-                _y = Math.parseInt(y);
-            } else if(!!(m = /^[+-]?\d*\.\d+$/i.exec(x))) {
-                _y = Math.parseFloat(y);
+                _y = Number.parseInt(y);
+            } else if(!!(m = /^[+-]?\d*\.\d+$/i.exec(y))) {
+                _y = Number.parseFloat(y);
+            } else if (WEBGUI.DEBUG) {
+                console.error("函数 WEBGUI.Point2D.setY 的参数 y = '" + y + "'，不是数字。");
             }
+        } else if (WEBGUI.DEBUG) {
+            console.error("函数 WEBGUI.Point2D.setY 的参数不是数字。");
         }
     }
     
     function copyPonit(point) {
         _x = point.getX();
         _y = point.getY();
+    }
+}
+
+WEBGUI.Ponit2D.prototype = {
+    constructor: WEBGUI.Ponit2D,
+    get value() {
+        return this.getValue();
+    },
+    set value(v) {
+        this.setValue(v);
+    },
+    get x() {
+        return this.getX();
+    },
+    set x(v) {
+        this.setX(v);
+    },
+    get y() {
+        return this.getY();
+    },
+    set y(v) {
+        this.setY(v);
+    },
+    clone: function(){
+        return new WEBGUI.Ponit2D(this);
     }
 }
