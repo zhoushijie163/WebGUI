@@ -6,7 +6,7 @@
  * @author Zhou Shijie
  */
 "use strict";
-var WEBGUI = {REVISION: '1'};
+var WEBGUI = {REVISION: '1.0.0'};
 
 // Browserify 支持
 if (typeof window.define === 'function' && window.define.amd) {
@@ -19,8 +19,107 @@ if (typeof window.define === 'function' && window.define.amd) {
  *  Polyfills扩展
  */
 (function () {
+// Object
+
+    if(Object.defineProperty === undefined) {
+        Object.defineProperty = function (obj, propertyname, descriptor){
+            function convertToDescriptor(desc){
+                function hasProperty(obj, prop){
+                    return Object.prototype.hasOwnProperty.call(obj, prop);
+                }
+                function isCallable(v){
+                    // 如果除函数以外,还有其他类型的值也可以被调用,则可以修改下面的语句
+                    return typeof v === "function";
+                }
+                if (typeof desc !== "object" || desc === null) throw new TypeError("不是正规的对象");
+                var d = {};
+                if (hasProperty(desc, "enumerable")) d.enumerable = !!desc.enumerable;
+                if (hasProperty(desc, "configurable")) d.configurable = !!desc.configurable;
+                if (hasProperty(desc, "value")) d.value = desc.value;
+                if (hasProperty(desc, "writable")) d.writable = !!desc.writable;
+                if (hasProperty(desc, "get")){
+                    var g = desc.get;
+                    if (!isCallable(g) && g !== "undefined") throw new TypeError("bad get");
+                    d.get = g;
+                }
+                if (hasProperty(desc, "set")){
+                    var s = desc.set;
+                    if (!isCallable(s) && s !== "undefined") throw new TypeError("bad set");
+                    d.set = s;
+                }
+                if (("get" in d || "set" in d) && ("value" in d || "writable" in d)) throw new TypeError("自相矛盾的描述符");
+                return d;
+            }
+            if (typeof obj !== "object" || obj === null) throw new TypeError("不是正规的对象");
+            obj[propertyname] = convertToDescriptor(descriptor);
+            
+            return obj;
+        }
+    }
+    if (Object.defineProperties === undefined) {
+//参考 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperties
+        Object.defineProperties = function (obj, properties) {
+            function convertToDescriptor(desc){
+                function hasProperty(obj, prop){
+                    return Object.prototype.hasOwnProperty.call(obj, prop);
+                }
+                function isCallable(v){
+                    // 如果除函数以外,还有其他类型的值也可以被调用,则可以修改下面的语句
+                    return typeof v === "function";
+                }
+                if (typeof desc !== "object" || desc === null) throw new TypeError("不是正规的对象");
+                var d = {};
+                if (hasProperty(desc, "enumerable")) d.enumerable = !!desc.enumerable;
+                if (hasProperty(desc, "configurable")) d.configurable = !!desc.configurable;
+                if (hasProperty(desc, "value")) d.value = desc.value;
+                if (hasProperty(desc, "writable")) d.writable = !!desc.writable;
+                if (hasProperty(desc, "get")){
+                    var g = desc.get;
+                    if (!isCallable(g) && g !== "undefined") throw new TypeError("bad get");
+                    d.get = g;
+                }
+                if (hasProperty(desc, "set")){
+                    var s = desc.set;
+                    if (!isCallable(s) && s !== "undefined") throw new TypeError("bad set");
+                    d.set = s;
+                }
+                if (("get" in d || "set" in d) && ("value" in d || "writable" in d)) throw new TypeError("自相矛盾的描述符");
+                return d;
+            }
+            if (typeof obj !== "object" || obj === null)
+            throw new TypeError("不是正规的对象");
+            properties = Object(properties);
+            var keys = Object.keys(properties);
+            var descs = [];
+            for (var i = 0; i < keys.length; i++)
+            descs.push([keys[i], convertToDescriptor(properties[keys[i]])]);
+            for (var i = 0; i < descs.length; i++)
+            Object.defineProperty(obj, descs[i][0], descs[i][1]);
+            return obj;
+        };
+    }
+    if (Object.assign === undefined) {
+//参考 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
+        Object.assign = function ( target ) {
+            if ( target === undefined || target === null ) {
+                throw new TypeError( '不能将未定义或空转换为对象' );
+            }
+            var output = Object( target );
+            for ( var index = 1; index < arguments.length; index ++ ) {
+                var nextSource = arguments[ index ];
+                if ( nextSource !== undefined && nextSource !== null ) {
+                    for ( var nextKey in nextSource ) {
+                        if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
+                            output[ nextKey ] = nextSource[ nextKey ];
+                        }
+                    }
+                }
+            }
+        };
+    }
+    
 // Function
-    if (Function.prototype.name === undefined && Object.defineProperty !== undefined) {
+    if (Function.prototype.name === undefined) {
 //参考 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/name
         Object.defineProperty(Function.prototype, 'name', {
             get: function () {
@@ -1746,7 +1845,6 @@ WEBGUI.Ponit2D = function () {
         _y = point.getY();
     }
 }
-
 WEBGUI.Ponit2D.prototype = {
     constructor: WEBGUI.Ponit2D,
     get value() {
