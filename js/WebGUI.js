@@ -1796,7 +1796,7 @@ WEBGUI.Ponit2D = function () {
             setX(value.x);
             setY(value.y);
         } else if (WEBGUI.DEBUG) {
-            console.error("函数 WEBGUI.Point2D.setX 的参数不能识别。");
+            console.error("函数 WEBGUI.Point2D.setValue 的参数不能识别。");
         }
     }
     
