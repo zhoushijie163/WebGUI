@@ -1757,7 +1757,7 @@ WEBGUI.Ponit2D = function () {
     
     this.equals = function (point) {
         if (typeof point === "object" && point instanceof WEBGUI.Ponit2D) {
-            return (point.getX() === _x) && (color.getY() === _y);
+            return (point.getX() === _x) && (point.getY() === _y);
         } else {
             return false;
         }
@@ -1788,7 +1788,7 @@ WEBGUI.Ponit2D = function () {
                 setX(m[2]);
                 setY(m[1]);
             } else if (WEBGUI.DEBUG) {
-                 console.error("函数 WEBGUI.Point2D.setValue 的参数 value = '" + x + "'，不能识别。");
+                 console.error("函数 WEBGUI.Point2D.setValue 的参数 value = '" + value + "'，不能识别。");
             }
         } else if (typeof value === "object" && value instanceof WEBGUI.Ponit2D) {
             copyPonit(value);
@@ -1867,5 +1867,328 @@ WEBGUI.Ponit2D.prototype = {
     },
     clone: function(){
         return new WEBGUI.Ponit2D(this);
+    }
+}
+
+WEBGUI.Ponit3D = function () {
+    var _x = 0, _y = 0, _z = 0;
+    switch (arguments.length) {
+        case 1:
+            setValue(arguments[0]);
+            break;
+        case 2:
+            setValue2(arguments[0], arguments[1]);
+            break;
+        case 3:
+            setX(arguments[0]);
+            setY(arguments[1]);
+            setZ(arguments[2]);
+            break;
+    }
+    
+    this.getValue = getValue;
+    this.setValue = setValue;
+    this.getX = getX;
+    this.setX = setX;
+    this.getY = getY;
+    this.setY = setY;
+    this.getZ = getZ;
+    this.setZ = setZ;
+    
+    this.copy = function (point) {
+        if (typeof point === "object" && point instanceof WEBGUI.Ponit3D) {
+            copyPonit(point);
+        } else if (typeof point === "object" && point instanceof WEBGUI.Ponit2D) {
+            copyPonit2D(point);
+        }
+    };
+    
+    this.equals = function (point) {
+        if (typeof point === "object" && point instanceof WEBGUI.Ponit3D) {
+            return (point.getX() === _x) && (point.getY() === _y) && (point.getZ() === _z);
+        } else {
+            return false;
+        }
+    };
+
+    function getValue() {
+        var val = {x: 0, y: 0, z: 0};
+        val.x = _x;
+        val.y = _y;
+        val.z = _z;
+        return val;
+    }
+    function setValue(value) {
+        if (typeof value === "number") {
+            _x = value;
+        } else if (typeof value === "string") {
+            var m;
+            if (!!(m = /^[+-]?(0x[0-9a-f]+|\d+)$/i.exec(value))) {
+                _x = Number.parseInt(value);
+            } else if(!!(m = /^[+-]?\d*\.\d+$/i.exec(value))) {
+                _x = Number.parseFloat(value);
+            } else if(!!(m = /^\{\s*[\'\"]?(.+?)[\'\"]?\s*,\s*[\'\"]?(.+?)[\'\"]?\s*\}$/i.exec(value))) {
+                setX(m[1]);
+                setY(m[2]);
+            } else if(!!(m = /^\{\s*[\'\"]?(.+?)[\'\"]?\s*,\s*[\'\"]?(.+?)[\'\"]?\s*,\s*[\'\"]?(.+?)[\'\"]?\s*\}$/i.exec(value))) {
+                setX(m[1]);
+                setY(m[2]);
+                setZ(m[3]);
+            } else if(!!(m = /^\{\s*x\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*,\s*y\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*\}$/i.exec(value))) {
+                setX(m[1]);
+                setY(m[2]);
+            } else if(!!(m = /^\{\s*x\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*,\s*z\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*\}$/i.exec(value))) {
+                setX(m[1]);
+                setZ(m[2]);
+            } else if(!!(m = /^\{\s*y\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*,\s*x\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*\}$/i.exec(value))) {
+                setX(m[2]);
+                setY(m[1]);
+            } else if(!!(m = /^\{\s*y\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*,\s*z\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*\}$/i.exec(value))) {
+                setY(m[1]);
+                setZ(m[2]);
+            } else if(!!(m = /^\{\s*z\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*,\s*x\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*\}$/i.exec(value))) {
+                setX(m[2]);
+                setZ(m[1]);
+            } else if(!!(m = /^\{\s*z\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*,\s*y\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*\}$/i.exec(value))) {
+                setY(m[2]);
+                setZ(m[1]);
+            } else if(!!(m = /^\{\s*x\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*,\s*y\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*,\s*z\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*\}$/i.exec(value))) {
+                setX(m[1]);
+                setY(m[2]);
+                setZ(m[3]);
+            } else if(!!(m = /^\{\s*x\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*,\s*z\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*,\s*y\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*\}$/i.exec(value))) {
+                setX(m[1]);
+                setY(m[3]);
+                setZ(m[2]);
+            } else if(!!(m = /^\{\s*y\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*,\s*x\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*,\s*z\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*\}$/i.exec(value))) {
+                setX(m[2]);
+                setY(m[1]);
+                setZ(m[3]);
+            } else if(!!(m = /^\{\s*y\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*,\s*z\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*,\s*x\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*\}$/i.exec(value))) {
+                setX(m[2]);
+                setY(m[3]);
+                setZ(m[1]);
+            } else if(!!(m = /^\{\s*z\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*,\s*x\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*,\s*y\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*\}$/i.exec(value))) {
+                setX(m[3]);
+                setY(m[1]);
+                setZ(m[2]);
+            } else if(!!(m = /^\{\s*z\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*,\s*y\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*,\s*x\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*\}$/i.exec(value))) {
+                setX(m[3]);
+                setY(m[2]);
+                setZ(m[1]);
+            } else if (WEBGUI.DEBUG) {
+                 console.error("函数 WEBGUI.Point3D.setValue 的参数 value = '" + value + "'，不能识别。");
+            }
+        } else if (typeof value === "object" && value instanceof WEBGUI.Ponit3D) {
+            copyPonit(value);
+        } else if (typeof value === "object" && value instanceof WEBGUI.Ponit2D) {
+            copyPonit2D(value);
+        } else if ((!!value.x) && (!!value.y) && (!!value.z)) {
+            setX(value.x);
+            setY(value.y);
+            setZ(value.z);
+        } else if ((!!value.x) && (!!value.y)) {
+            setX(value.x);
+            setY(value.y);
+        } else if ((!!value.x) && (!!value.z)) {
+            setX(value.x);
+            setZ(value.z);
+        } else if ((!!value.y) && (!!value.z)) {
+            setY(value.y);
+            setZ(value.z);
+        } else if (WEBGUI.DEBUG) {
+            console.error("函数 WEBGUI.Point3D.setValue 的参数不能识别。");
+        }
+    }
+    function setValue2(value1, value2) {
+        if (typeof value1 === "number") {
+            _x = value1;
+            setYZ();
+        } else if (typeof value1 === "string") {
+            var m;
+            if (!!(m = /^[+-]?(0x[0-9a-f]+|\d+)$/i.exec(value1))) {
+                _x = Number.parseInt(value1);
+                setYZ();
+            } else if(!!(m = /^[+-]?\d*\.\d+$/i.exec(value1))) {
+                _x = Number.parseFloat(value1);
+                setYZ();
+            } else if(!!(m = /^\{\s*[\'\"]?(.+?)[\'\"]?\s*,\s*[\'\"]?(.+?)[\'\"]?\s*\}$/i.exec(value1))) {
+                setX(m[1]);
+                setY(m[2]);
+                setZ(value2);
+            } else if(!!(m = /^\{\s*x\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*,\s*y\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*\}$/i.exec(value1))) {
+                setX(m[1]);
+                setY(m[2]);
+                setZ(value2);
+            } else if(!!(m = /^\{\s*x\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*,\s*z\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*\}$/i.exec(value1))) {
+                setX(m[1]);
+                setY(value2);
+                setZ(m[2]);
+            } else if(!!(m = /^\{\s*y\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*,\s*x\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*\}$/i.exec(value1))) {
+                setX(m[2]);
+                setY(m[1]);
+                setZ(value2);
+            } else if(!!(m = /^\{\s*z\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*,\s*x\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*\}$/i.exec(value1))) {
+                setX(m[2]);
+                setY(value2);
+                setZ(m[1]);
+            } else if(!!(m = /^\{\s*y\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*,\s*z\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*\}$/i.exec(value1))) {
+                setX(value2);
+                setY(m[1]);
+                setZ(m[2]);
+            } else if(!!(m = /^\{\s*z\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*,\s*y\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*\}$/i.exec(value1))) {
+                setX(value2);
+                setY(m[2]);
+                setZ(m[1]);
+            } else if (WEBGUI.DEBUG) {
+                 console.error("函数 WEBGUI.Point3D.setValueD 的参数 value1 = '" + value1 + "'，不能识别。");
+            }
+        } else if (typeof value1 === "object" && value1 instanceof WEBGUI.Ponit2D) {
+            copyPonit2D(value1);
+            setZ(value2);
+        } else if ((!!value1.x) && (!!value1.y)) {
+            setX(value1.x);
+            setY(value1.y);
+            setZ(value2);
+        } else if ((!!value1.x) && (!!value1.z)) {
+            setX(value1.x);
+            setY(value2);
+            setZ(value1.z);
+        } else if ((!!value1.y) && (!!value1.z)) {
+            setX(value2);
+            setY(value1.y);
+            setZ(value1.z);
+        } else if (WEBGUI.DEBUG) {
+            console.error("函数 WEBGUI.Point3D.setValue2 的参数 value1 不能识别。");
+        }
+        
+        function setYZ() {
+            if (typeof value2 === "number") {
+                _y = value2;
+            } else if (typeof value2 === "string") {
+                var n;
+                if (!!(n = /^[+-]?(0x[0-9a-f]+|\d+)$/i.exec(value2))) {
+                    _y = Number.parseInt(value2);
+                } else if(!!(n = /^[+-]?\d*\.\d+$/i.exec(value2))) {
+                    _y = Number.parseFloat(value2);
+                } else if(!!(n = /^\{\s*[\'\"]?(.+?)[\'\"]?\s*,\s*[\'\"]?(.+?)[\'\"]?\s*\}$/i.exec(value2))) {
+                    setY(n[1]);
+                    setZ(n[2]);
+                } else if(!!(n = /^\{\s*y\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*,\s*z\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*\}$/i.exec(value2))) {
+                    setY(n[1]);
+                    setZ(n[2]);
+                } else if(!!(n = /^\{\s*z\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*,\s*y\s*\:\s*[\'\"]?(.+?)[\'\"]?\s*\}$/i.exec(value2))) {
+                    setY(n[2]);
+                    setZ(n[1]);
+                } else if (WEBGUI.DEBUG) {
+                     console.error("函数 WEBGUI.Point3D.setValue2 的参数 value2 = '" + value2 + "'，不能识别。");
+                }
+            } else if ((!!value2.y) && (!!value2.z)) {
+                setY(value2.y);
+                setZ(value2.z);
+            } else if (WEBGUI.DEBUG) {
+                console.error("函数 WEBGUI.Point3D.setValue2 的参数 value2 不能识别。");
+            }
+        }
+    }
+    
+    function getX() {
+        return _x;
+    }
+    function setX(x) {
+        if (typeof x === "number") {
+            _x = x;
+        } else if (typeof x === "string") {
+            var m;
+            if (!!(m = /^[+-]?(0x[0-9a-f]+|\d+)$/i.exec(x))) {
+                _x = Number.parseInt(x);
+            } else if(!!(m = /^[+-]?\d*\.\d+$/i.exec(x))) {
+                _x = Number.parseFloat(x);
+            } else if (WEBGUI.DEBUG) {
+                console.error("函数 WEBGUI.Point3D.setX 的参数 x = '" + x + "'，不是数字。");
+            }
+        } else if (WEBGUI.DEBUG) {
+            console.error("函数 WEBGUI.Point3D.setX 的参数不是数字。");
+        }
+    }
+
+    function getY() {
+        return _y;
+    }
+    function setY(y) {
+        if (typeof y === "number") {
+            _y = y;
+        } else if (typeof y === "string") {
+            var m;
+            if (!!(m = /^[+-]?(0x[0-9a-f]+|\d+)$/i.exec(y))) {
+                _y = Number.parseInt(y);
+            } else if(!!(m = /^[+-]?\d*\.\d+$/i.exec(y))) {
+                _y = Number.parseFloat(y);
+            } else if (WEBGUI.DEBUG) {
+                console.error("函数 WEBGUI.Point3D.setY 的参数 y = '" + y + "'，不是数字。");
+            }
+        } else if (WEBGUI.DEBUG) {
+            console.error("函数 WEBGUI.Point3D.setY 的参数不是数字。");
+        }
+    }
+
+    function getZ() {
+        return _z;
+    }
+    function setZ(z) {
+        if (typeof z === "number") {
+            _z = z;
+        } else if (typeof z === "string") {
+            var m;
+            if (!!(m = /^[+-]?(0x[0-9a-f]+|\d+)$/i.exec(y))) {
+                _z = Number.parseInt(y);
+            } else if(!!(m = /^[+-]?\d*\.\d+$/i.exec(y))) {
+                _z = Number.parseFloat(y);
+            } else if (WEBGUI.DEBUG) {
+                console.error("函数 WEBGUI.Point3D.setZ 的参数 z = '" + z + "'，不是数字。");
+            }
+        } else if (WEBGUI.DEBUG) {
+            console.error("函数 WEBGUI.Point3D.setZ 的参数不是数字。");
+        }
+    }
+    
+    function copyPonit(point) {
+        _x = point.getX();
+        _y = point.getY();
+        _z = point.getZ();
+    }
+    function copyPonit2D(point) {
+        _x = point.getX();
+        _y = point.getY();
+    }
+}
+WEBGUI.Ponit3D.prototype = {
+    constructor: WEBGUI.Ponit3D,
+    get value() {
+        return this.getValue();
+    },
+    set value(v) {
+        this.setValue(v);
+    },
+    get x() {
+        return this.getX();
+    },
+    set x(v) {
+        this.setX(v);
+    },
+    get y() {
+        return this.getY();
+    },
+    set y(v) {
+        this.setY(v);
+    },
+    get z() {
+        return this.getZ();
+    },
+    set z(v) {
+        this.setZ(v);
+    },
+    clone: function(){
+        return new WEBGUI.Ponit3D(this);
     }
 }
